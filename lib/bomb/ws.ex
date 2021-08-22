@@ -5,6 +5,10 @@ defmodule Ws do
 
   map update syntax
   %{oldmap | field: field_data}
+
+  Looking up, dispatching and registering are efficient and immediate at the
+  cost of delayed unsubscription. For example, if a process crashes, its keys
+  are automatically removed from the registry but the change may not propagate immediately.
   """
   @behaviour :cowboy_websocket
   @r Registry.Bomb
@@ -20,21 +24,27 @@ defmodule Ws do
   end
 
   def websocket_init(state) do
-
-    if Registry.count(Registry.Bomb) == 0 do
+    if Registry.count(@r) == 0 do
+      # first client
       agent_data = %{:admin => self()}
       GlobalState.create(state.room_id, agent_data)
     end
 
-    GlobalState.add_player(state.room_id, self())
+    Registry.register(@r, state.room_id, {})
 
-    Registry.register(Registry.Bomb, state.room_id, {})
+    # test room cap
+    if Registry.count(@r) > 3 do
+      Process.send(self(), Jason.encode!(%{:msg => "sorry)", :tmpdata => 0}), [])
+    end
+
+    GlobalState.add_player(state.room_id, self())
+    # TODO FIX PIDs stays in agent after connection drops
+    # should use some ids instead of pids
 
     # no_admins =
     #   Enum.all?(Keyword.values(Registry.lookup(@r, state.room_id)), fn x -> x != true end)
 
-    # IO.inspect(Registry.lookup(@r, state.room_id))
-    # IO.inspect no_admins
+    # IO.inspect Registry.lookup(@r, state.room_id)
 
     {:ok, state}
   end
@@ -46,14 +56,23 @@ defmodule Ws do
     # b = Registry.lookup(Registry.Bomb, state.room_id)
     # IO.inspect(b)
 
+
     payload = Jason.decode!(json)
 
     textmsg = payload["data"]["message"]
     message = Jason.encode!(%{:msg => textmsg, :tmpdata => 0})
 
+
     broadcast(@r, state.room_id, message)
 
+    # test kill
+    if textmsg == "killme" do
+      GlobalState.kill_player(state.room_id, self())
+    end
+
     IO.inspect GlobalState.get(state.room_id)
+    IO.inspect(Registry.lookup(@r, state.room_id))
+    IO.inspect [">", self(), textmsg]
 
     {:reply, {:text, message}, state}
   end

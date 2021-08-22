@@ -27,6 +27,10 @@ defmodule GlobalState do
     end)
   end
 
+  def kill_player(room_id, pid) do
+    Agent.update(@name, GlobalState, :move_player_to_spectators, [room_id, pid])
+  end
+
   def reset do
     Agent.update(@name, fn _state -> %{} end)
   end
@@ -43,4 +47,18 @@ defmodule GlobalState do
     end)
   end
 
+  def move_player_to_spectators(state, room_id, pid) do
+    new_data =
+      Map.get(state, room_id)
+      |> Map.update(:players, [], fn old_list ->
+        old_list -- [pid]
+      end)
+      |> Map.update(:dead, [pid], fn old_list ->
+        old_list ++ [pid]
+      end)
+
+    Map.update!(state, room_id, fn _old_state ->
+      new_data
+    end)
+  end
 end
