@@ -2,9 +2,9 @@
     class myWebsocketHandler {
       setupSocket() {
         let xpath = document.location.pathname;
-        let params = new URLSearchParams(document.location.search.substring(1)); // todo
-
-        this.socket = new WebSocket("ws://localhost:4000/ws" + xpath)
+        // let params = new URLSearchParams(document.location.search.substring(1));
+        
+        this.socket = new WebSocket("ws://localhost:4000/ws" + xpath + document.location.search)
   
         this.socket.addEventListener("message", (event) => {
           const pTag = document.createElement("p")

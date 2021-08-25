@@ -28,8 +28,7 @@ defmodule Bomb.Application do
       Registry.child_spec(
         keys: :duplicate,
         name: Registry.Bomb
-      ),
-      GlobalState
+      )
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

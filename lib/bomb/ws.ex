@@ -14,21 +14,35 @@ defmodule Ws do
   @r Registry.Bomb
 
   def init(request, _state) do
-    state = %{room_id: request.path}
-
-    # IO.inspect request
-
+    IO.inspect(request)
     :logger.info("Joined room with id " <> request.path)
 
-    {:cowboy_websocket, request, state, %{idle_timeout: 120_000}}
+    # BIG TODO
+    state = %{room_id: request.path, admin: false, players: [], p: nil}
+
+    uri_params = URI.decode_query(request.qs)
+
+    IO.inspect(uri_params)
+
+    case Map.has_key?(uri_params, "u") do
+      true ->
+        state2 = %{state | p: uri_params["u"]}
+        {:cowboy_websocket, request, state2, %{idle_timeout: 120_000}}
+
+      false ->
+        :logger.info("Request without identity")
+        # a kak
+        false
+    end
   end
 
   def websocket_init(state) do
-    if Registry.count(@r) == 0 do
-      # first client
-      agent_data = %{:admin => self()}
-      GlobalState.create(state.room_id, agent_data)
-    end
+    state =
+      if Registry.count(@r) == 0 do
+        %{state | admin: true}
+      else
+        state
+      end
 
     Registry.register(@r, state.room_id, {})
 
@@ -36,13 +50,6 @@ defmodule Ws do
     if Registry.count(@r) > 3 do
       Process.send(self(), Jason.encode!(%{:msg => "sorry)", :tmpdata => 0}), [])
     end
-
-    GlobalState.add_player(state.room_id, self())
-    # TODO FIX PIDs stays in agent after connection drops
-    # should use some ids instead of pids
-
-    # no_admins =
-    #   Enum.all?(Keyword.values(Registry.lookup(@r, state.room_id)), fn x -> x != true end)
 
     # IO.inspect Registry.lookup(@r, state.room_id)
 
@@ -56,23 +63,17 @@ defmodule Ws do
     # b = Registry.lookup(Registry.Bomb, state.room_id)
     # IO.inspect(b)
 
-
     payload = Jason.decode!(json)
 
     textmsg = payload["data"]["message"]
     message = Jason.encode!(%{:msg => textmsg, :tmpdata => 0})
 
+    broadcast(@r, state.room_id, {:normal_msg, message})
 
-    broadcast(@r, state.room_id, message)
+    # IO.inspect(Registry.lookup(@r, state.room_id))
+    IO.inspect(state)
 
-    # test kill
-    if textmsg == "killme" do
-      GlobalState.kill_player(state.room_id, self())
-    end
-
-    IO.inspect GlobalState.get(state.room_id)
-    IO.inspect(Registry.lookup(@r, state.room_id))
-    IO.inspect [">", self(), textmsg]
+    # IO.inspect([">", self(), textmsg])
 
     {:reply, {:text, message}, state}
   end
@@ -80,7 +81,14 @@ defmodule Ws do
   def websocket_info(info, state) do
     # recived via send
     # IO.inspect info
-    {:reply, {:text, info}, state}
+    case info do
+      {:normal_msg, message} ->
+        {:reply, {:text, message}, state}
+
+      {_, _} ->
+        :logger.info("ws info nothing")
+        {:ok, state}
+    end
   end
 
   def broadcast(registry, key, message) do
