@@ -19,16 +19,20 @@ defmodule Base do
 
   plug(:dispatch)
 
-  # EEx.function_from_file(:defp, :application_html, "lib/application.html.eex", [])
-
   get "/" do
-    # send_resp(conn, 200, "test")
     Plug.Conn.send_file(conn, 200, "static/index.html")
   end
 
   match _ do
-    Plug.Conn.send_file(conn, 200, "static/index.html")
+    # IO.inspect(conn)
+    p = conn.request_path |> String.slice(1..-1)
 
-    # send_resp(conn, 404, "404")
+    case File.exists?(p) do
+      true ->
+        Plug.Conn.send_file(conn, 200, p)
+
+      false ->
+        send_resp(conn, 404, "404")
+    end
   end
 end

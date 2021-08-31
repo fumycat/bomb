@@ -27,3 +27,8 @@ bomb-*.tar
 
 # Elm
 /elm-stuff/
+
+# Elm compiled dev
+/static/index.js
+/static/game.js
+/static/settings.js

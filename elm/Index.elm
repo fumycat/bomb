@@ -1,8 +1,10 @@
 module Index exposing (main)
 
 import Browser
+import Browser.Navigation exposing (load)
 import Element exposing (..)
 import Element.Background as Background
+import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html)
 import Time
@@ -62,23 +64,27 @@ view model =
     in
     layout [ Background.gradient gradient_options, width fill ]
         (column [ centerY, width fill, padding 24 ]
-            [ row [centerX] [ el [] (text "Hi") ]
-            , row [centerX, paddingXY 0 40]
+            [ row [ centerX ] [ el [ Font.size 64 ] (text "Bomb") ]
+            , row [ centerX, paddingXY 0 40 ]
                 [ el []
                     (Input.button
                         [ Background.color (rgb 0.9 0.9 0.7), padding 32 ]
-                        { onPress = Nothing, label = text "Click me" }
+                        { onPress = Just CreateRoom, label = text "Create new game" }
                     )
                 ]
             ]
         )
 
 
+
+-- https://package.elm-lang.org/packages/elm/random/latest/Random
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         CreateRoom ->
-            ( model, Cmd.none )
+            ( model, load "/todo?u=todo2" )
 
         Shift _ ->
             ( { model | color_angle = model.color_angle + colorShiftSpeed }, Cmd.none )
