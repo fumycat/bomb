@@ -1,16 +1,40 @@
-module Game exposing (..)
+port module Game exposing (..)
 
 import Browser
 import Element exposing (..)
 import Html exposing (Html)
+import Json.Encode as Encode
+import Settings exposing (Model)
 
 
 type Msg
-    = ChangeX
+    = Fingerprint String
+      -- | CheckFingerprint
+    | WebSocket String
 
 
-type Model
-    = Data Float
+type Event
+    = CheckFingerprint String
+    | Register String
+    | Start
+
+
+type alias Model =
+    { fp : String
+    , game_id : String
+    }
+
+
+port updateUrl : String -> Cmd msg
+
+
+port fingerprint : (String -> msg) -> Sub msg
+
+
+port sendMessage : String -> Cmd msg
+
+
+port messageReceiver : (String -> msg) -> Sub msg
 
 
 main : Program () Model Msg
@@ -25,19 +49,46 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init () =
-    ( Data 0.0, Cmd.none )
+    ( Model "loading..." "-> TODO ->", updateUrl randomGame )
 
 
-view : a -> Html Msg
+view : Model -> Html Msg
 view model =
-    layout [] (text "TODO")
+    layout [] (text model.fp)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    case msg of
+        Fingerprint f_string ->
+            ( { model | fp = f_string }, sendMessage (eventEncoder <| CheckFingerprint f_string) )
+
+        WebSocket ws_message ->
+            ( model, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
+subscriptions _ =
+    Sub.batch [ fingerprint Fingerprint, messageReceiver WebSocket ]
+
+
+randomGame : String
+randomGame =
+    "AsDfg"
+
+
+eventEncoder : Event -> String
+eventEncoder event =
+    let
+        value =
+            case event of
+                CheckFingerprint fp ->
+                    Encode.object [ ( "check", Encode.string fp ) ]
+
+                Register username ->
+                    Encode.object [ ( "register", Encode.string username ) ]
+
+                Start ->
+                    Encode.object [ ( "start", Encode.string "TODO opts?" ) ]
+    in
+    Encode.encode 0 value

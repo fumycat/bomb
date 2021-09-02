@@ -37,8 +37,6 @@ defmodule Ws do
   end
 
   def websocket_init(state) do
-    # Если registry общая на все сокеты то это не должно работать
-    # или я плыву уже
     state =
       if Registry.count(@r) == 0 do
         %{state | admin: true}
