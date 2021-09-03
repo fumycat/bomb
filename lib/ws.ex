@@ -17,48 +17,57 @@ defmodule Ws do
     IO.inspect(request)
     :logger.info("Joined room with id " <> request.path)
 
-    # BIG TODO
-    state = %{room_id: request.path, admin: false, players: [], p: nil}
+    state = %{
+      room_id: request.path,
+      admin: false,
+      started: false,
+      order: nil,
+      used_words: [],
+      others: [],
+      name: "Guest #{:rand.uniform(20)}",
+      grace: Application.fetch_env!(:bomb, :grace),
+      max_players: Application.fetch_env!(:bomb, :max_players)
+    }
 
-    uri_params = URI.decode_query(request.qs)
+    {:cowboy_websocket, request, state, %{idle_timeout: 120_000}}
 
-    IO.inspect(uri_params)
+    # uri_params = URI.decode_query(request.qs)
 
-    case Map.has_key?(uri_params, "u") do
-      true ->
-        state2 = %{state | p: uri_params["u"]}
-        {:cowboy_websocket, request, state2, %{idle_timeout: 120_000}}
+    # IO.inspect(uri_params)
 
-      false ->
-        :logger.info("Request without identity")
-        # a kak
-        false
-    end
+    # case Map.has_key?(uri_params, "u") do
+    #   true ->
+    #     state2 = %{state | p: uri_params["u"]}
+    #     {:cowboy_websocket, request, state2, %{idle_timeout: 120_000}}
+
+    #   false ->
+    #     :logger.info("Request without identity")
+    #     # a kak
+    #     false
+    # end
   end
 
   def websocket_init(state) do
-    state = %{state | admin: Registry.lookup(@r, state.room_id) == []}
+    players = Registry.lookup(@r, state.room_id)
+    state = %{state | admin: players == []}
 
-    Registry.register(@r, state.room_id, {})
 
-    # test room cap
-    if Registry.count(@r) > 3 do
-      Process.send(self(), Jason.encode!(%{:msg => "sorry)", :tmpdata => 0}), [])
+    if length(players) < 9 do
+      ^state = %{state | order: length(players)}
     end
 
-    # IO.inspect Registry.lookup(@r, state.room_id)
+    Registry.register(@r, state.room_id, {})
 
     {:ok, state}
   end
 
   def websocket_handle({:text, json}, state) do
-    # [{_, {v}} | _] = Registry.lookup(Registry.Bomb, state.room_id)
-    # a = Registry.values(Registry.Bomb, state.room_id, self())
-    # IO.inspect(a)
-    # b = Registry.lookup(Registry.Bomb, state.room_id)
-    # IO.inspect(b)
-
     payload = Jason.decode!(json)
+
+    case payload["action"] do
+      "register" ->
+        IO.puts("TODO")
+    end
 
     textmsg = payload["data"]["message"]
     message = Jason.encode!(%{:msg => textmsg, :tmpdata => 0})
@@ -74,7 +83,7 @@ defmodule Ws do
   end
 
   def websocket_info(info, state) do
-    # recived via send
+    # received via send
     # IO.inspect info
     case info do
       {:normal_msg, message} ->

@@ -1,0 +1,16 @@
+[
+    [
+        "-register",
+        "-start",
+        "-kick",
+        "-setNickname",
+        "-sendWord"
+    ],
+    [
+        "-symbols",
+        "-hurt",
+        "-dead",
+        "-ok",
+        "-wrong"
+    ]
+]
