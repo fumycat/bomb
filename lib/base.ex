@@ -32,7 +32,13 @@ defmodule Base do
         Plug.Conn.send_file(conn, 200, p)
 
       false ->
-        send_resp(conn, 404, "404")
+        case String.match?(p, ~r/^[A-z]{5,5}$/) do
+          true ->
+            Plug.Conn.send_file(conn, 200, "static/game.html")
+
+          false ->
+            send_resp(conn, 404, "404")
+        end
     end
   end
 end

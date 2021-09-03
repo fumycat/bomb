@@ -2,54 +2,48 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge"> -->
-    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
-    <title>Bomb!</title>
+  <meta charset="UTF-8">
+  <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge"> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+  <title>Bomb!</title>
 </head>
 
 <body>
-    <div id="main"></div>
-    <script src="game.js"></script>
-    <script>
-        var app = Elm.Game.init({
-            node: document.getElementById('main')
-        });
+  <div id="main"></div>
+  <script src="game.js"></script>
+  <script>
+    var app = Elm.Game.init({
+      node: document.getElementById('main')
+    });
 
-        // Initialize the agent at application startup.
-        const fpPromise = new Promise((resolve, reject) => {
-          const script = document.createElement('script')
-          script.onload = resolve
-          script.onerror = reject
-          script.async = true
-          script.src = 'https://cdn.jsdelivr.net/npm/'
-            + '@fingerprintjs/fingerprintjs@3/dist/fp.min.js'
-          document.head.appendChild(script)
-        })
-          .then(() => FingerprintJS.load());
-      
-        fpPromise
-          .then(fp => fp.get())
-          .then(result => app.ports.fingerprint.send(result.visitorId));
-        
-        // var socket = new WebSocket('ws://' + document.location.host + '/ws' + document.location.pathname);
+    // Initialize the agent at application startup.
+    const fpPromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.onload = resolve
+      script.onerror = reject
+      script.async = true
+      script.src = 'https://cdn.jsdelivr.net/npm/'
+        + '@fingerprintjs/fingerprintjs@3/dist/fp.min.js'
+      document.head.appendChild(script)
+    })
+      .then(() => FingerprintJS.load());
 
-        app.ports.updateUrl.subscribe(function(urlString) {
-            window.history.replaceState(null, null, document.location.origin + '/' + urlString);
-        });
+    fpPromise
+      .then(fp => fp.get())
+      .then(result => app.ports.fingerprint.send(result.visitorId)); // yes, i know about flags
 
-        app.ports.sendMessage.subscribe(function(message) {
-            // socket.send(message);
-            // mock
-            console.log(message);
-        });
+    // var socket = new WebSocket('ws://' + document.location.host + '/ws' + document.location.pathname);
 
-        // TODO ws in port
+    app.ports.sendMessage.subscribe(function (message) {
+      // socket.send(message);
+      // mock
+      console.log(message);
+    });
 
+    // TODO ws in port
 
+  </script>
 
-      </script>
-      
 </body>
 
 </html>

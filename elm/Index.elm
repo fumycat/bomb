@@ -7,11 +7,15 @@ import Element.Background as Background
 import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html)
+import Random
+import Random.Char
+import Random.String
 import Time
 
 
 type Msg
-    = CreateRoom
+    = ClickNewRoom
+    | CreateRoom String
     | Shift Time.Posix
 
 
@@ -24,6 +28,11 @@ type alias Model =
     { info : Info
     , color_angle : Float
     }
+
+
+cmdNewRoom : Cmd Msg
+cmdNewRoom =
+    Random.generate CreateRoom (Random.String.string 5 Random.Char.english)
 
 
 colorShiftSpeed : Float
@@ -69,7 +78,7 @@ view model =
                 [ el []
                     (Input.button
                         [ Background.color (rgb 0.9 0.9 0.7), padding 32 ]
-                        { onPress = Just CreateRoom, label = text "Create new game" }
+                        { onPress = Just ClickNewRoom, label = text "Create new game" }
                     )
                 ]
             ]
@@ -83,8 +92,11 @@ view model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        CreateRoom ->
-            ( model, load "/todo?u=todo2" )
+        ClickNewRoom ->
+            ( model, cmdNewRoom )
+
+        CreateRoom game_id ->
+            ( model, load game_id )
 
         Shift _ ->
             ( { model | color_angle = model.color_angle + colorShiftSpeed }, Cmd.none )

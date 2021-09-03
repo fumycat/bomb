@@ -25,8 +25,6 @@ type alias Model =
     }
 
 
-port updateUrl : String -> Cmd msg
-
 
 port fingerprint : (String -> msg) -> Sub msg
 
@@ -49,7 +47,7 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init () =
-    ( Model "loading..." "-> TODO ->", updateUrl randomGame )
+    ( Model "loading..." "-> TODO ->", Cmd.none )
 
 
 view : Model -> Html Msg
@@ -70,11 +68,6 @@ update msg model =
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch [ fingerprint Fingerprint, messageReceiver WebSocket ]
-
-
-randomGame : String
-randomGame =
-    "AsDfg"
 
 
 eventEncoder : Event -> String

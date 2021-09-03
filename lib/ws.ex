@@ -37,12 +37,7 @@ defmodule Ws do
   end
 
   def websocket_init(state) do
-    state =
-      if Registry.count(@r) == 0 do
-        %{state | admin: true}
-      else
-        state
-      end
+    state = %{state | admin: Registry.lookup(@r, state.room_id) == []}
 
     Registry.register(@r, state.room_id, {})
 
