@@ -32,3 +32,6 @@ bomb-*.tar
 /static/index.js
 /static/game.js
 /static/settings.js
+
+# Minified js
+*.min.js

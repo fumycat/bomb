@@ -7,7 +7,8 @@ defmodule Bomb.MixProject do
       version: "0.1.0",
       elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      aliases: aliases()
     ]
   end
 
@@ -16,6 +17,21 @@ defmodule Bomb.MixProject do
     [
       extra_applications: [:logger],
       mod: {Bomb.Application, []}
+    ]
+  end
+
+  defp aliases do
+    [
+      dev_elm: [
+        "cmd mix elm_dev elm/Index.elm static/index.js",
+        "cmd mix elm_dev elm/Settings.elm static/settings.js",
+        "cmd mix elm_dev elm/Game.elm static/game.js"
+      ],
+      elm: [
+        "cmd mix elm_prod elm/Index.elm static/index.js",
+        "cmd mix elm_prod elm/Settings.elm static/settings.js",
+        "cmd mix elm_prod elm/Game.elm static/game.js"
+      ]
     ]
   end
 
