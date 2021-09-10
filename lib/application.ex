@@ -32,11 +32,15 @@ defmodule Bomb.Application do
       %{
         id: :dict_server,
         start: {:dict_server, :start_link, []}
-      }
+      },
+      DynamicSupervisor.child_spec(
+        restart: :temporary,
+        strategy: :one_for_one,
+        name: Bomb.DynamicSupervisor
+      ),
+      {Registry, keys: :unique, name: EyesRegistry}
     ]
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Bomb.Supervisor]
     Supervisor.start_link(children, opts)
   end

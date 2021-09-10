@@ -12,6 +12,8 @@
   <div id="main"></div>
   <script src="game.js"></script>
   <script>
+    var socket = new WebSocket('ws://' + document.location.host + '/ws' + document.location.pathname);
+    
     var app = Elm.Game.init({
       node: document.getElementById('main')
     });
@@ -30,17 +32,17 @@
 
     fpPromise
       .then(fp => fp.get())
-      .then(result => app.ports.fingerprint.send(result.visitorId)); // yes, i know about flags
+      .then(result => app.ports.fingerprint.send(result.visitorId));
 
-    // var socket = new WebSocket('ws://' + document.location.host + '/ws' + document.location.pathname);
 
     app.ports.sendMessage.subscribe(function (message) {
-      // socket.send(message);
-      // mock
-      console.log(message);
+      socket.send(message);
     });
 
-    // TODO ws in port
+    socket.addEventListener("message", (event) => {
+      app.ports.messageReceiver.send(event.data);
+    })
+
 
   </script>
 

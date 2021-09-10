@@ -7,6 +7,7 @@ defmodule Bomb.MixProject do
       version: "0.1.0",
       elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
+      default_task: "run",
       deps: deps(),
       aliases: aliases()
     ]
@@ -16,7 +17,11 @@ defmodule Bomb.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {Bomb.Application, []}
+      mod: {Bomb.Application, []},
+      env: [
+        grace: 7,
+        max_players: 9
+      ]
     ]
   end
 
