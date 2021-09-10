@@ -28,7 +28,11 @@ defmodule Bomb.Application do
       Registry.child_spec(
         keys: :duplicate,
         name: Registry.Bomb
-      )
+      ),
+      %{
+        id: :dict_server,
+        start: {:dict_server, :start_link, []}
+      }
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

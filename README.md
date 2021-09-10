@@ -2,7 +2,6 @@
 
 
 ## Notes
-- Enum.member? is O(n)
 - https://hexdocs.pm/elixir/1.12/Process.html#monitor/1
 - Cowboy will call websocket_info/2 whenever an Erlang message arrives.
 
