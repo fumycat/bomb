@@ -7,19 +7,21 @@ defmodule Bomb.Application do
 
   @impl true
   def start(_type, _args) do
+    :ok = Services.Conf.init_conf()
+
     children = [
       # Starts a worker by calling: Bomb.Worker.start_link(arg)
       # {Bomb.Worker, arg}
       # {Plug.Cowboy, scheme: :http, plug: Base, options: [port: 4001]}
       Plug.Cowboy.child_spec(
         scheme: :http,
-        plug: Base,
+        plug: Bomb.MainRouter,
         options: [
           dispatch: [
             {:_,
              [
-               {"/ws/[...]", Ws, []},
-               {:_, Plug.Cowboy.Handler, {Base, []}}
+               {"/ws/[...]", Bomb.Ws, []},
+               {:_, Plug.Cowboy.Handler, {Bomb.MainRouter, []}}
              ]}
           ],
           port: 4000
@@ -30,15 +32,9 @@ defmodule Bomb.Application do
         name: Registry.Bomb
       ),
       %{
-        id: :dict_server,
-        start: {:dict_server, :start_link, []}
+        id: Services.Dict,
+        start: {Services.Dict, :start_link, []}
       },
-      DynamicSupervisor.child_spec(
-        restart: :temporary,
-        strategy: :one_for_one,
-        name: Bomb.DynamicSupervisor
-      ),
-      {Registry, keys: :unique, name: EyesRegistry}
     ]
 
     opts = [strategy: :one_for_one, name: Bomb.Supervisor]

@@ -8,35 +8,15 @@ defmodule Bomb.MixProject do
       elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
       default_task: "run",
-      deps: deps(),
-      aliases: aliases()
+      deps: deps()
     ]
   end
 
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger],
       mod: {Bomb.Application, []},
-      env: [
-        grace: 7,
-        max_players: 9
-      ]
-    ]
-  end
-
-  defp aliases do
-    [
-      dev_elm: [
-        "cmd mix elm_dev elm/Index.elm static/index.js",
-        "cmd mix elm_dev elm/Settings.elm static/settings.js",
-        "cmd mix elm_dev elm/Game.elm static/game.js"
-      ],
-      elm: [
-        "cmd mix elm_prod elm/Index.elm static/index.js",
-        "cmd mix elm_prod elm/Settings.elm static/settings.js",
-        "cmd mix elm_prod elm/Game.elm static/game.js"
-      ]
+      extra_applications: [:logger],
     ]
   end
 
@@ -44,7 +24,8 @@ defmodule Bomb.MixProject do
   defp deps do
     [
       {:plug_cowboy, "~> 2.0"},
-      {:jason, "~> 1.2"}
+      {:jason, "~> 1.2"},
+      {:yaml_elixir, "~> 2.8"},
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]

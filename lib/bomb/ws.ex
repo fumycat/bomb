@@ -1,4 +1,4 @@
-defmodule Ws do
+defmodule Bomb.Ws do
   @moduledoc """
   https://ninenines.eu/docs/en/cowboy/2.6/manual/cowboy_websocket/
   https://ninenines.eu/docs/en/cowboy/2.6/guide/ws_handlers/
@@ -54,21 +54,6 @@ defmodule Ws do
     players = Registry.lookup(@r, state.room_id)
     state = %{state | admin: players == []}
 
-    if state.admin do
-      {:ok, _} =
-        DynamicSupervisor.start_child(
-          Bomb.DynamicSupervisor,
-          %{
-            id: Eye,
-            start: {Eye, :start_link, [self(), state.room_id]}
-          }
-        )
-    else
-      Eye.join(state.room_id)
-    end
-
-    # IO.inspect(DynamicSupervisor.which_children(Bomb.DynamicSupervisor))
-
     case length(players) < 9 do
       true ->
         Registry.register(@r, state.room_id, {})
@@ -92,8 +77,8 @@ defmodule Ws do
     # message = Jason.encode!(%{:msg => textmsg, :tmpdata => 0})
 
     IO.inspect("sending test message")
-    [{pid, _}] = Registry.lookup(EyesRegistry, "eye#{state.room_id}")
-    send(pid, "00000000 test")
+    # [{pid, _}] = Registry.lookup(EyesRegistry, "eye#{state.room_id}")
+    # send(pid, "00000000 test")
 
     # broadcast(@r, state.room_id, {:normal_msg, message})
 
