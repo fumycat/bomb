@@ -66,6 +66,8 @@ defmodule Bomb.Ws do
   end
 
   def websocket_handle({:text, json}, state) do
+    IO.puts("| Got message")
+    IO.inspect(json)
     # payload = Jason.decode!(json)
 
     # case payload["action"] do
@@ -76,7 +78,6 @@ defmodule Bomb.Ws do
     # textmsg = payload["data"]["message"]
     # message = Jason.encode!(%{:msg => textmsg, :tmpdata => 0})
 
-    IO.inspect("sending test message")
     # [{pid, _}] = Registry.lookup(EyesRegistry, "eye#{state.room_id}")
     # send(pid, "00000000 test")
 

@@ -11,3 +11,7 @@ min_players:
   mutable: False
   default: 3
   lcap: 2
+lives:
+  mutable: True
+  default: 2
+  lcap: 1

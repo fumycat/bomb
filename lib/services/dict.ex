@@ -10,7 +10,7 @@ defmodule Services.Dict do
     set = :gb_sets.new()
 
     filled_set =
-      File.read!("dictionary/words.txt")
+      File.read!("cfg/words.txt")
       |> String.split()
       |> List.foldl(set, fn e, acc -> :gb_sets.add(e, acc) end)
 

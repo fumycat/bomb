@@ -1,8 +1,11 @@
 port module Game exposing (..)
 
+-- import Element exposing (..)
+
 import Browser
-import Element exposing (..)
-import Html exposing (Html)
+import Html exposing (Html, div, input, text)
+import Html.Attributes exposing (placeholder, value)
+import Html.Events exposing (onInput)
 import Json.Encode as Encode
 import Settings exposing (Model)
 
@@ -11,19 +14,22 @@ type Msg
     = Fingerprint String
       -- | CheckFingerprint
     | WebSocket String
+    | Change String
 
 
 type Event
     = CheckFingerprint String
     | Register String
     | Start
+    | Typed String
+    | Submit
 
 
 type alias Model =
     { fp : String
     , game_id : String
+    , in_field : String
     }
-
 
 
 port fingerprint : (String -> msg) -> Sub msg
@@ -47,12 +53,16 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init () =
-    ( Model "loading..." "-> TODO ->", Cmd.none )
+    ( Model "loading..." "-> TODO ->" "", Cmd.none )
 
 
 view : Model -> Html Msg
 view model =
-    layout [] (text model.fp)
+    -- layout [] (text model.fp)
+    div []
+        [ input [ placeholder "Text to reverse", value model.in_field, onInput Change ] []
+        , div [] [ text model.in_field ]
+        ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -63,6 +73,9 @@ update msg model =
 
         WebSocket ws_message ->
             ( model, Cmd.none )
+
+        Change newContent ->
+            ( { model | in_field = newContent }, sendMessage (eventEncoder <| Typed newContent) )
 
 
 subscriptions : Model -> Sub Msg
@@ -83,5 +96,11 @@ eventEncoder event =
 
                 Start ->
                     Encode.object [ ( "start", Encode.string "TODO opts?" ) ]
+
+                Typed string ->
+                    Encode.object [ ( "typed", Encode.string string ) ]
+
+                Submit ->
+                    Encode.object [ ( "submit", Encode.string "?" ) ]
     in
     Encode.encode 0 value

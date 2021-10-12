@@ -12,4 +12,10 @@ defmodule Services.Conf do
     :ets.insert(@config_table, configKw)
     :ok
   end
+
+  @spec get_conf(String.t()) :: map()
+  def get_conf(key) do
+    [{_, m}] = :ets.lookup(@config_table, key)
+    m
+  end
 end
