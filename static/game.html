@@ -13,7 +13,7 @@
   <script src="game.js"></script>
   <script>
     var socket = new WebSocket('ws://' + document.location.host + '/ws' + document.location.pathname);
-    
+
     var app = Elm.Game.init({
       node: document.getElementById('main')
     });
@@ -30,10 +30,11 @@
     })
       .then(() => FingerprintJS.load());
 
-    fpPromise
-      .then(fp => fp.get())
-      .then(result => app.ports.fingerprint.send(result.visitorId));
-
+    socket.addEventListener("open", () => {
+      fpPromise
+        .then(fp => fp.get())
+        .then(result => app.ports.fingerprint.send(result.visitorId));
+    });
 
     app.ports.sendMessage.subscribe(function (message) {
       console.log("Sending to ws: " + message);
