@@ -23,6 +23,7 @@ defmodule Bomb.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:plug_cowboy, "~> 2.0"},
       {:jason, "~> 1.2"},
       # {:dep_from_hexpm, "~> 0.3.0"},

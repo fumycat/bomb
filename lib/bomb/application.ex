@@ -26,13 +26,19 @@ defmodule Bomb.Application do
         ]
       ),
       Registry.child_spec(
-        keys: :duplicate,
-        name: Registry.Bomb
+        name: PlayersRegistry,
+        keys: :duplicate
       ),
-      %{
-        id: Services.Dict,
-        start: {Services.Dict, :start_link, []}
-      },
+      Registry.child_spec(
+        name: BrainRegistry,
+        keys: :unique
+      ),
+      DynamicSupervisor.child_spec(
+        name: BrainSupervisor,
+        strategy: :one_for_one,
+        max_children: Application.fetch_env!(:bomb, :games_max)
+      ),
+      Services.Dict.child_spec()
     ]
 
     opts = [strategy: :one_for_one, name: Bomb.Supervisor]
