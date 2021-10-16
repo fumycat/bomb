@@ -15,6 +15,9 @@ defmodule Bomb.Ws do
   @behaviour :cowboy_websocket
   @r Registry.Bomb
 
+  require Logger
+
+  @impl true
   def init(request, _state) do
     IO.inspect(request)
     :logger.info("Joined room with id " <> request.path)
@@ -50,6 +53,7 @@ defmodule Bomb.Ws do
     # end
   end
 
+  @impl true
   def websocket_init(state) do
     players = Registry.lookup(@r, state.room_id)
     state = %{state | admin: players == []}
@@ -65,10 +69,17 @@ defmodule Bomb.Ws do
     end
   end
 
+  @impl true
   def websocket_handle({:text, json}, state) do
-    IO.puts("| Got message")
-    IO.inspect(json)
-    # payload = Jason.decode!(json)
+    case Jason.decode(json) do
+      {:ok, payload} ->
+        Logger.debug("in ws msg; room: #{state.room_id} msg: #{inspect(payload)}")
+        # TODO
+      {:error, _} ->
+        :timer.sleep(1000) # clown protection
+        Logger.notice("bad ws msg; room: #{state.room_id} msg: #{inspect(json)}")
+        {:reply, {:text, "{\"error\":\"Bad message\"}"}, state}
+    end
 
     # case payload["action"] do
     #   "register" ->
@@ -91,6 +102,7 @@ defmodule Bomb.Ws do
     {:ok, state}
   end
 
+  @impl true
   def websocket_info(info, state) do
     # received via send
     # IO.inspect info
@@ -101,6 +113,18 @@ defmodule Bomb.Ws do
       {_, _} ->
         :logger.info("ws info nothing")
         {:ok, state}
+    end
+  end
+
+  @impl true
+  def terminate(reason, _req, state) do
+    case reason do
+      {:crash, c, r} ->
+        Logger.error("Websocket connection terminated in room: #{state.room_id} (crash) #{inspect(c)} #{inspect(r)}")
+      {:error, r} ->
+        Logger.error("Websocket connection terminated in room: #{state.room_id} (error) #{inspect(r)}")
+      _ ->
+        Logger.debug("Websocket connection terminated in room: #{state.room_id}")
     end
   end
 

@@ -7,8 +7,6 @@ defmodule Bomb.Application do
 
   @impl true
   def start(_type, _args) do
-    :ok = Services.Conf.init_conf()
-
     children = [
       # Starts a worker by calling: Bomb.Worker.start_link(arg)
       # {Bomb.Worker, arg}

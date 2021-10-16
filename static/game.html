@@ -36,10 +36,12 @@
 
 
     app.ports.sendMessage.subscribe(function (message) {
+      console.log("Sending to ws: " + message);
       socket.send(message);
     });
 
     socket.addEventListener("message", (event) => {
+      console.log("Got ws message: " + event.data);
       app.ports.messageReceiver.send(event.data);
     })
 
