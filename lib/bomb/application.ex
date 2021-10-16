@@ -34,6 +34,7 @@ defmodule Bomb.Application do
         keys: :unique
       ),
       DynamicSupervisor.child_spec(
+        restart: :transient,
         name: BrainSupervisor,
         strategy: :one_for_one,
         max_children: Application.fetch_env!(:bomb, :games_max)
