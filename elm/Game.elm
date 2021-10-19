@@ -1,11 +1,10 @@
 port module Game exposing (..)
 
--- import Element exposing (..)
-
 import Browser
-import Html exposing (Html, div, input, text)
-import Html.Attributes exposing (placeholder, value)
-import Html.Events exposing (onInput)
+import Browser.Events
+import Html exposing (Html, div, img, a)
+import Html.Attributes exposing (class, src, attribute)
+import Json.Decode as Decode
 import Json.Encode as Encode
 import Settings exposing (Model)
 
@@ -14,6 +13,7 @@ type Msg
     = Fingerprint String
       -- | CheckFingerprint
     | WebSocket String
+    | KeyPress String
     | Change String
 
 
@@ -58,10 +58,13 @@ init () =
 
 view : Model -> Html Msg
 view model =
-    -- layout [] (text model.fp)
-    div []
-        [ input [ placeholder "Text to reverse", value model.in_field, onInput Change ] []
-        , div [] [ text model.in_field ]
+    div [ class "container", attribute "style" "--tan: 0.41; --m: 5" ]
+        [ a [] [img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] []]
+        , a [attribute "style" "--i: 1"] [img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] []]
+        , a [attribute "style" "--i: 2"] [img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] []]
+        , a [attribute "style" "--i: 3"] [img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] []]
+        , a [attribute "style" "--i: 4"] [img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] []]
+        , a [attribute "style" "--i: 5"] [img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] []]
         ]
 
 
@@ -77,10 +80,17 @@ update msg model =
         Change newContent ->
             ( { model | in_field = newContent }, sendMessage (eventEncoder <| Typed newContent) )
 
+        KeyPress s ->
+            ( { model | in_field = s }, Cmd.none )
+
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.batch [ fingerprint Fingerprint, messageReceiver WebSocket ]
+    Sub.batch
+        [ fingerprint Fingerprint
+        , messageReceiver WebSocket
+        , Browser.Events.onKeyDown keyDecoder
+        ]
 
 
 eventEncoder : Event -> String
@@ -104,3 +114,13 @@ eventEncoder event =
                     Encode.object [ ( "submit", Encode.string "?" ) ]
     in
     Encode.encode 0 value
+
+
+keyDecoder : Decode.Decoder Msg
+keyDecoder =
+    Decode.map toKey (Decode.field "key" Decode.string)
+
+
+toKey : String -> Msg
+toKey string =
+    KeyPress string

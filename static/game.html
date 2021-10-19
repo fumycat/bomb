@@ -6,6 +6,37 @@
   <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge"> -->
   <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
   <title>Bomb!</title>
+  <style>
+    .container {
+      --d: 6.5em;
+      /* image size */
+      --rel: 1;
+      /* how much extra space we want between images, 1 = one image size */
+      --r: calc(.5*(1 + var(--rel))*var(--d)/var(--tan));
+      /* circle radius */
+      --s: calc(2*var(--r) + var(--d));
+      /* container size */
+      position: relative;
+      width: var(--s);
+      height: var(--s);
+      background: silver;
+    }
+
+    .container a {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      margin: calc(-.5*var(--d));
+      width: var(--d);
+      height: var(--d);
+      --az: calc(var(--i)*1turn/var(--m));
+      transform: rotate(var(--az)) translate(var(--r)) rotate(calc(-1*var(--az)));
+    }
+
+    img {
+      max-width: 100%;
+    }
+  </style>
 </head>
 
 <body>
