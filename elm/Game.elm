@@ -2,11 +2,10 @@ port module Game exposing (..)
 
 import Browser
 import Browser.Events
-import Html exposing (Html, div, img, a)
-import Html.Attributes exposing (class, src, attribute)
-import Json.Decode as Decode
+import Html exposing (Html, a, div, img)
+import Html.Attributes exposing (attribute, class, src)
+import Json.Decode as Decode exposing (Decoder, andThen, decodeString, fail, field, string)
 import Json.Encode as Encode
-import Settings exposing (Model)
 
 
 type Msg
@@ -14,7 +13,7 @@ type Msg
       -- | CheckFingerprint
     | WebSocket String
     | KeyPress String
-    | Change String
+    | Ignore
 
 
 type Event
@@ -23,6 +22,17 @@ type Event
     | Start
     | Typed String
     | Submit
+
+
+type WatchedKey
+    = AlphaKey String
+    | ClearKey
+    | EnterKey
+    | IgnoreKey
+
+
+type alias TestTypeForAndThen =
+    { text : String }
 
 
 type alias Model =
@@ -59,12 +69,12 @@ init () =
 view : Model -> Html Msg
 view model =
     div [ class "container", attribute "style" "--tan: 0.41; --m: 5" ]
-        [ a [] [img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] []]
-        , a [attribute "style" "--i: 1"] [img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] []]
-        , a [attribute "style" "--i: 2"] [img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] []]
-        , a [attribute "style" "--i: 3"] [img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] []]
-        , a [attribute "style" "--i: 4"] [img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] []]
-        , a [attribute "style" "--i: 5"] [img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] []]
+        [ a [] [ img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] [] ]
+        , a [ attribute "style" "--i: 1" ] [ img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] [] ]
+        , a [ attribute "style" "--i: 2" ] [ img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] [] ]
+        , a [ attribute "style" "--i: 3" ] [ img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] [] ]
+        , a [ attribute "style" "--i: 4" ] [ img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] [] ]
+        , a [ attribute "style" "--i: 5" ] [ img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] [] ]
         ]
 
 
@@ -77,11 +87,11 @@ update msg model =
         WebSocket ws_message ->
             ( model, Cmd.none )
 
-        Change newContent ->
-            ( { model | in_field = newContent }, sendMessage (eventEncoder <| Typed newContent) )
-
         KeyPress s ->
-            ( { model | in_field = s }, Cmd.none )
+            ( { model | in_field = model.in_field ++ s }, sendMessage (eventEncoder <| Typed model.in_field) )
+
+        Ignore ->
+            ( model, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
@@ -116,6 +126,32 @@ eventEncoder event =
     Encode.encode 0 value
 
 
+decodeServerJson : String -> Maybe TestTypeForAndThen
+decodeServerJson json_msg =
+    case decodeString serverEventDecoder json_msg of
+        Ok v ->
+            Just v
+
+        Err error ->
+            Nothing
+
+
+serverEventDecoder : Decoder TestTypeForAndThen
+serverEventDecoder =
+    field "event" string
+        |> andThen serverEventHelp
+
+
+serverEventHelp : String -> Decoder TestTypeForAndThen
+serverEventHelp str =
+    case str of
+        "typed" ->
+            Decode.map TestTypeForAndThen (field "text" string)
+
+        _ ->
+            fail ""
+
+
 keyDecoder : Decode.Decoder Msg
 keyDecoder =
     Decode.map toKey (Decode.field "key" Decode.string)
@@ -123,4 +159,9 @@ keyDecoder =
 
 toKey : String -> Msg
 toKey string =
-    KeyPress string
+    case string of
+        "a" ->
+            KeyPress string
+
+        _ ->
+            Ignore
