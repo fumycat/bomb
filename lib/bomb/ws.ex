@@ -55,6 +55,8 @@ defmodule Bomb.Ws do
         {:error, why} ->
           Logger.error("Failed to start game room: #{state.room_id} reason: #{inspect(why)}")
 
+        # TODO send error to user?
+
         :ignore ->
           Logger.critical("Not implemeted :ignore room: #{state.room_id}")
 
@@ -63,7 +65,14 @@ defmodule Bomb.Ws do
       end
     end
 
-    new_state = register_player(state, players)
+    Registry.register(@r, state.room_id, {})
+
+    new_state = %{
+      state
+      | admin: players == [],
+        spectator: not RoomManager.register_player(state.room_id)
+    }
+
     {:ok, new_state}
   end
 
@@ -135,17 +144,5 @@ defmodule Bomb.Ws do
         end
       end
     end)
-  end
-
-  @spec register_player(map(), list()) :: map()
-  defp register_player(state, players) do
-    Registry.register(@r, state.room_id, {})
-    # RoomManager.register_player(state.room_id, self())
-    # TODO добавить регистрацию
-    %{
-      state
-      | admin: players == [],
-        spectator: not RoomManager.allow_join?(state.room_id, length(players))
-    }
   end
 end

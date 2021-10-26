@@ -14,9 +14,9 @@ defmodule RoomManager do
   def tweak(room_id, setting, value),
     do: GenServer.call(process_name(room_id), {:tweak, setting, value})
 
-  @spec allow_join?(String.t(), integer()) :: boolean()
-  def allow_join?(room_id, current_players),
-    do: GenServer.call(process_name(room_id), {:allow_join, current_players})
+  @spec register_player(String.t()) :: boolean()
+  def register_player(room_id),
+    do: GenServer.call(process_name(room_id), {:register_player})
 
   @spec child_spec({pid(), String.t()}) :: map()
   def child_spec(init_arg) do
@@ -37,7 +37,7 @@ defmodule RoomManager do
     state = %{
       room_id: room_id,
       admin_pid: pid,
-      # actual_players: [], TODO
+      actual_players: [],
       turn: nil,
       used_words: [],
       settings: %{
@@ -50,10 +50,17 @@ defmodule RoomManager do
   end
 
   @impl true
-  def handle_call({:allow_join, current_players}, _from, state) do
-    Logger.debug("RoomManager allow_join call")
-    allow = current_players < state.settings.players_max
-    {:reply, allow, state}
+  def handle_call({:register_player}, {pid, _} = _from, state) do
+    Logger.debug("RoomManager register_player call")
+    Process.monitor(pid)
+    # care about spectators for now
+
+    if length(state.actual_players) <= state.settings.players_max do
+      new_state = %{state | actual_players: [pid | state.actual_players]}
+      {:reply, true, new_state}
+    else
+      {:reply, false, state}
+    end
   end
 
   @impl true
@@ -74,10 +81,19 @@ defmodule RoomManager do
     end
   end
 
-  # def handle_call({:register, pid}, _from, state) do
-  #   Logger.debug("RoomManager is_open call")
-  #   {:reply, state.open, state}
-  # end
+  @impl true
+  def handle_info({:DOWN, _ref, :process, object, _reason}, state) do
+    # TODO notify about player leaving
+    new_state = %{state | actual_players: state.actual_players -- [object]}
+    Logger.debug("Process #{inspect(object)} down in room #{state.room_id}")
+    {:noreply, new_state}
+  end
+
+  @impl true
+  def handle_info(msg, state) do
+    Logger.warning("Unhandled info in room #{state.room_id}: #{inspect(msg)}")
+    {:noreply, state}
+  end
 
   # Helper functions
 
