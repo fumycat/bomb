@@ -1,4 +1,4 @@
-defmodule Bomb.MainRouter do
+defmodule Router do
   @moduledoc """
   https://hexdocs.pm/plug/Plug.Router.html
   """

@@ -8,13 +8,13 @@ defmodule BombCoreApp do
     children = [
       Plug.Cowboy.child_spec(
         scheme: :http,
-        plug: Bomb.MainRouter,
+        plug: Router,
         options: [
           dispatch: [
             {:_,
              [
                {"/ws/[...]", PlayerWS, []},
-               {:_, Plug.Cowboy.Handler, {Bomb.MainRouter, []}}
+               {:_, Plug.Cowboy.Handler, {Router, []}}
              ]}
           ],
           port: 4000
