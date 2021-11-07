@@ -5,10 +5,10 @@ defmodule RoomManager do
   require Logger
   use GenServer
 
-  # Api
+  @enforce_keys [:room_id, :admin_pid, :settings]
+  defstruct [:room_id, :admin_pid, :settings, :turn, used_words: [], actual_players: []]
 
-  # def register_player(room_id, pid),
-  #   do: GenServer.call(process_name(room_id), {:register, pid})
+  # Api
 
   @spec tweak(String.t(), :lives | :players_max, integer()) :: any()
   def tweak(room_id, setting, value),
@@ -34,12 +34,9 @@ defmodule RoomManager do
 
   @impl true
   def init({pid, room_id}) do
-    state = %{
+    state = %RoomManager{
       room_id: room_id,
       admin_pid: pid,
-      actual_players: [],
-      turn: nil,
-      used_words: [],
       settings: %{
         lives: Application.fetch_env!(:bomb, :lives_def),
         players_max: Application.fetch_env!(:bomb, :players_max)

@@ -1,4 +1,4 @@
-defmodule Bomb.Ws do
+defmodule PlayerWS do
   @moduledoc """
   https://ninenines.eu/docs/en/cowboy/2.6/manual/cowboy_websocket/
   https://ninenines.eu/docs/en/cowboy/2.6/guide/ws_handlers/
@@ -26,18 +26,17 @@ defmodule Bomb.Ws do
 
   require Logger
 
+  @enforce_keys [:room_id, :name]
+  defstruct [:room_id, :name, :is_admin, :is_spectator]
+
   @impl true
   def init(request, _state) do
     # IO.inspect(request)
     Logger.info("Joined room with id " <> request.path)
 
-    state = %{
+    state = %PlayerWS{
       room_id: request.path,
-      admin: false,
-      # TODO determinate order at game start
-      order: nil,
-      name: "Guest #{:rand.uniform(20)}",
-      spectator: false
+      name: "Guest #{:rand.uniform(20)}"
     }
 
     {:cowboy_websocket, request, state, %{idle_timeout: 120_000}}
@@ -67,11 +66,9 @@ defmodule Bomb.Ws do
 
     Registry.register(@r, state.room_id, {})
 
-    new_state = %{
-      state
-      | admin: players == [],
-        spectator: not RoomManager.register_player(state.room_id)
-    }
+    registered = RoomManager.register_player(state.room_id)
+
+    new_state = %{state | is_admin: players == [], is_spectator: not registered}
 
     {:ok, new_state}
   end

@@ -18,7 +18,7 @@ defmodule Bomb.Application do
           dispatch: [
             {:_,
              [
-               {"/ws/[...]", Bomb.Ws, []},
+               {"/ws/[...]", PlayerWS, []},
                {:_, Plug.Cowboy.Handler, {Bomb.MainRouter, []}}
              ]}
           ],

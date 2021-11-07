@@ -21,10 +21,6 @@ type Event
     | Submit
 
 
-type alias TestTypeForAndThen =
-    { text : String }
-
-
 type ServerEvent
     = PlayerTyping String String
     | PlayerJoin String
@@ -113,7 +109,7 @@ eventEncoder event =
                     Encode.object [ ( "start", Encode.null ) ]
 
                 BufferChanged s ->
-                    Encode.object [ ( "typed", Encode.string s ) ]
+                    Encode.object [ ( "buff", Encode.string s ) ]
 
                 Submit ->
                     Encode.object [ ( "submit", Encode.null ) ]
@@ -141,15 +137,6 @@ serverEventHelp str =
 
         _ ->
             fail "TODO maybe add error message?"
-
-
-
--- abc : List String
--- abc =
---     [ "а ", "б ", "в ", "г ", "д ", "е ", "ё ", "ж "
---     , "з ", "и ", "й ", "к ", "л ", "м ", "н ", "о "
---     , "п ", "р ", "с ", "т ", "у ", "ф ", "х ", "ц "
---     , "ч ", "ш ", "щ ", "ъ ", "ы ", "ь ", "э ", "ю ", "я " ]
 
 
 keyUpdate : Model -> String -> ( Model, Cmd Msg )
