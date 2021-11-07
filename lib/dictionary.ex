@@ -7,8 +7,8 @@ defmodule Dictionary do
 
   def child_spec(_init_arg \\ []) do
     %{
-      id: Services.Dict,
-      start: {Services.Dict, :start_link, []}
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, []}
     }
   end
 
