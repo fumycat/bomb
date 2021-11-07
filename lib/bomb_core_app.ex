@@ -34,7 +34,7 @@ defmodule BombCoreApp do
         strategy: :one_for_one,
         max_children: Application.fetch_env!(:bomb, :games_max)
       ),
-      Services.Dict.child_spec()
+      Dictionary.child_spec()
     ]
 
     opts = [strategy: :one_for_one, name: Bomb.Supervisor]

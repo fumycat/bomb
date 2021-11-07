@@ -1,4 +1,4 @@
-defmodule Services.Dict do
+defmodule Dictionary do
   use GenServer
 
   def start_link() do

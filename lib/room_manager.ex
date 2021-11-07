@@ -1,6 +1,6 @@
 defmodule RoomManager do
   @moduledoc """
-  Генсервер спавнится под ManagersRegistry для каждой игровой комнаты.
+  Генсервер спавнится под ManagerSupervisor для каждой игровой комнаты.
   """
   require Logger
   use GenServer
