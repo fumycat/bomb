@@ -63,7 +63,7 @@ init () =
 view : Model -> Html Msg
 view model =
     div [ class "container", attribute "style" "--tan: 0.41; --m: 5" ]
-        [ a [] [ img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] [] ]
+        [ a [] [ img [ src "bomb.svg" ] [] ]
         , a [ attribute "style" "--i: 1" ] [ img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] [] ]
         , a [ attribute "style" "--i: 2" ] [ img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] [] ]
         , a [ attribute "style" "--i: 3" ] [ img [ src "https://assets.codepen.io/2017/17_05_a_amur_leopard_25.jpg" ] [] ]
