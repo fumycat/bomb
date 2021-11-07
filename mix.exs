@@ -15,7 +15,7 @@ defmodule Bomb.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      mod: {Bomb.Application, []},
+      mod: {BombCoreApp, []},
       extra_applications: [:logger],
     ]
   end

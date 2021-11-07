@@ -48,7 +48,7 @@ defmodule PlayerWS do
 
     if players == [] do
       case DynamicSupervisor.start_child(
-             BrainSupervisor,
+             ManagerSupervisor,
              RoomManager.child_spec({self(), state.room_id})
            ) do
         {:error, why} ->
@@ -120,26 +120,5 @@ defmodule PlayerWS do
       _ ->
         Logger.debug("WS connection terminated in room: #{state.room_id}")
     end
-  end
-
-  # Helper functions
-
-  @spec broadcast(String.t(), {atom(), String.t()}) :: :ok
-  def broadcast(room_id, message) do
-    Registry.dispatch(@r, room_id, fn entries ->
-      for {pid, _} <- entries do
-        if pid != self() do
-          case Process.send(pid, message, []) do
-            :ok ->
-              :ok
-
-            err ->
-              Logger.warning(
-                "broadcast send err room: #{room_id} err: #{err} dest pid: #{pid} msg: #{message}"
-              )
-          end
-        end
-      end
-    end)
   end
 end

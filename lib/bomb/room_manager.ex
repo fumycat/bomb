@@ -1,6 +1,6 @@
 defmodule RoomManager do
   @moduledoc """
-  Генсервер спавнится под BrainRegistry для каждой игровой комнаты.
+  Генсервер спавнится под ManagersRegistry для каждой игровой комнаты.
   """
   require Logger
   use GenServer
@@ -96,5 +96,25 @@ defmodule RoomManager do
 
   @spec process_name(String.t()) :: {:via, term(), term()}
   defp process_name(person),
-    do: {:via, Registry, {BrainRegistry, person}}
+    do: {:via, Registry, {ManagersRegistry, person}}
+
+  @spec broadcast(String.t(), {atom(), String.t()}, [pid()]) :: :ok
+  def broadcast(room_id, message, blacklist) do
+    Registry.dispatch(PlayersRegistry, room_id, fn entries ->
+      for {pid, _} <- entries do
+        if Enum.member?(blacklist, pid) do
+          case Process.send(pid, message, []) do
+            :ok ->
+              :ok
+
+            err ->
+              Logger.warning(
+                "broadcast send err room: #{room_id} err: #{err} dest pid: #{pid} msg: #{message}"
+              )
+          end
+        end
+      end
+    end)
+  end
+
 end

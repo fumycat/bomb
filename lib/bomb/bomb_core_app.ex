@@ -1,6 +1,4 @@
-defmodule Bomb.Application do
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
+defmodule BombCoreApp do
   @moduledoc false
 
   use Application
@@ -8,9 +6,6 @@ defmodule Bomb.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Starts a worker by calling: Bomb.Worker.start_link(arg)
-      # {Bomb.Worker, arg}
-      # {Plug.Cowboy, scheme: :http, plug: Base, options: [port: 4001]}
       Plug.Cowboy.child_spec(
         scheme: :http,
         plug: Bomb.MainRouter,
@@ -30,12 +25,12 @@ defmodule Bomb.Application do
         keys: :duplicate
       ),
       Registry.child_spec(
-        name: BrainRegistry,
+        name: ManagersRegistry,
         keys: :unique
       ),
       DynamicSupervisor.child_spec(
         restart: :transient,
-        name: BrainSupervisor,
+        name: ManagerSupervisor,
         strategy: :one_for_one,
         max_children: Application.fetch_env!(:bomb, :games_max)
       ),
