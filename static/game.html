@@ -77,6 +77,14 @@
       app.ports.messageReceiver.send(event.data);
     })
 
+    document.onkeydown = function (evt) {
+      // console.log(evt.key);
+      app.ports.keyEvents.send(evt.key);
+      if (evt.key == "Tab") {
+        evt.preventDefault();
+        evt.stopPropagation();
+      }
+    };
 
   </script>
 

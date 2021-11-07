@@ -1,7 +1,6 @@
 port module Game exposing (..)
 
 import Browser
-import Browser.Events
 import Html exposing (Html, a, div, img)
 import Html.Attributes exposing (attribute, class, src)
 import Json.Decode as Decode exposing (Decoder, andThen, decodeString, fail, field, string)
@@ -10,39 +9,38 @@ import Json.Encode as Encode
 
 type Msg
     = Fingerprint String
-      -- | CheckFingerprint
     | WebSocket String
     | KeyPress String
-    | Ignore
 
 
 type Event
     = CheckFingerprint String
     | Register String
     | Start
-    | Typed String
+    | BufferChanged String
     | Submit
-
-
-type WatchedKey
-    = AlphaKey String
-    | ClearKey
-    | EnterKey
-    | IgnoreKey
 
 
 type alias TestTypeForAndThen =
     { text : String }
 
 
+type ServerEvent
+    = PlayerTyping String String
+    | PlayerJoin String
+
+
 type alias Model =
     { fp : String
     , game_id : String
-    , in_field : String
+    , buffer : String
     }
 
 
 port fingerprint : (String -> msg) -> Sub msg
+
+
+port keyEvents : (String -> msg) -> Sub msg
 
 
 port sendMessage : String -> Cmd msg
@@ -85,13 +83,10 @@ update msg model =
             ( { model | fp = f_string }, sendMessage (eventEncoder <| CheckFingerprint f_string) )
 
         WebSocket ws_message ->
-            ( model, Cmd.none )
+            serverUpdate model ws_message
 
         KeyPress s ->
-            ( { model | in_field = model.in_field ++ s }, sendMessage (eventEncoder <| Typed model.in_field) )
-
-        Ignore ->
-            ( model, Cmd.none )
+            keyUpdate model s
 
 
 subscriptions : Model -> Sub Msg
@@ -99,7 +94,7 @@ subscriptions _ =
     Sub.batch
         [ fingerprint Fingerprint
         , messageReceiver WebSocket
-        , Browser.Events.onKeyDown keyDecoder
+        , keyEvents KeyPress
         ]
 
 
@@ -115,53 +110,84 @@ eventEncoder event =
                     Encode.object [ ( "register", Encode.string username ) ]
 
                 Start ->
-                    Encode.object [ ( "start", Encode.string "TODO opts?" ) ]
+                    Encode.object [ ( "start", Encode.null ) ]
 
-                Typed string ->
-                    Encode.object [ ( "typed", Encode.string string ) ]
+                BufferChanged s ->
+                    Encode.object [ ( "typed", Encode.string s ) ]
 
                 Submit ->
-                    Encode.object [ ( "submit", Encode.string "?" ) ]
+                    Encode.object [ ( "submit", Encode.null ) ]
     in
     Encode.encode 0 value
 
 
-decodeServerJson : String -> Maybe TestTypeForAndThen
-decodeServerJson json_msg =
-    case decodeString serverEventDecoder json_msg of
-        Ok v ->
-            Just v
-
-        Err error ->
-            Nothing
-
-
-serverEventDecoder : Decoder TestTypeForAndThen
+serverEventDecoder : Decoder ServerEvent
 serverEventDecoder =
     field "event" string
         |> andThen serverEventHelp
 
 
-serverEventHelp : String -> Decoder TestTypeForAndThen
+serverEventHelp : String -> Decoder ServerEvent
 serverEventHelp str =
     case str of
         "typed" ->
-            Decode.map TestTypeForAndThen (field "text" string)
+            Decode.map2 PlayerTyping
+                (field "from" string)
+                (field "text" string)
+
+        "join" ->
+            Decode.map PlayerJoin
+                (field "who" string)
 
         _ ->
-            fail ""
+            fail "TODO maybe add error message?"
 
 
-keyDecoder : Decode.Decoder Msg
-keyDecoder =
-    Decode.map toKey (Decode.field "key" Decode.string)
+
+-- abc : List String
+-- abc =
+--     [ "а ", "б ", "в ", "г ", "д ", "е ", "ё ", "ж "
+--     , "з ", "и ", "й ", "к ", "л ", "м ", "н ", "о "
+--     , "п ", "р ", "с ", "т ", "у ", "ф ", "х ", "ц "
+--     , "ч ", "ш ", "щ ", "ъ ", "ы ", "ь ", "э ", "ю ", "я " ]
 
 
-toKey : String -> Msg
-toKey string =
-    case string of
-        "a" ->
-            KeyPress string
+keyUpdate : Model -> String -> ( Model, Cmd Msg )
+keyUpdate model key =
+    case key of
+        "Enter" ->
+            ( model, sendMessage (eventEncoder <| Submit) )
+
+        "Tab" ->
+            ( { model | buffer = "" }, sendMessage (eventEncoder <| BufferChanged "") )
+
+        "Backspace" ->
+            let
+                new_buffer =
+                    String.dropRight 1 model.buffer
+            in
+            ( { model | buffer = new_buffer }, sendMessage (eventEncoder <| BufferChanged new_buffer) )
 
         _ ->
-            Ignore
+            let
+                new_buffer =
+                    if String.length key == 1 then
+                        model.buffer ++ key
+
+                    else
+                        model.buffer
+            in
+            ( { model | buffer = new_buffer }, sendMessage (eventEncoder <| BufferChanged new_buffer) )
+
+
+serverUpdate : Model -> String -> ( Model, Cmd Msg )
+serverUpdate model json_msg =
+    case decodeString serverEventDecoder json_msg of
+        Ok (PlayerTyping who what) ->
+            ( model, Cmd.none )
+
+        Ok (PlayerJoin who) ->
+            ( model, Cmd.none )
+
+        Err _ ->
+            ( model, Cmd.none )
