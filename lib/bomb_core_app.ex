@@ -1,6 +1,7 @@
 defmodule BombCoreApp do
   @moduledoc false
 
+  require Logger
   use Application
 
   @impl true
@@ -38,6 +39,7 @@ defmodule BombCoreApp do
     ]
 
     opts = [strategy: :one_for_one, name: Bomb.Supervisor]
+    Logger.info("Running bomb app...")
     Supervisor.start_link(children, opts)
   end
 end

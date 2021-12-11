@@ -82,7 +82,7 @@ defmodule RoomManager do
   def handle_info({:DOWN, _ref, :process, object, _reason}, state) do
     # TODO notify about player leaving
     new_state = %{state | actual_players: state.actual_players -- [object]}
-    Logger.debug("Process #{inspect(object)} down in room #{state.room_id}")
+    Logger.debug("Process #{inspect(object)} down in room #{state.room_id} players left: #{length(new_state.actual_players)}")
     {:noreply, new_state}
   end
 

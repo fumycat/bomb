@@ -30,6 +30,7 @@ defmodule Dictionary do
     {:reply, ans, state}
   end
 
+  @spec check(binary()) :: boolean()
   def check(word) do
     GenServer.call({:global, :dict_server}, {:ask, word})
   end
