@@ -2,7 +2,7 @@
 
 ## dev
 
-    npm install -g elm
+    npm install -g elm elm-format
     elm make elm/Game.elm --output static/game.js
     elm make elm/Index.elm --output static/index.js
     mix deps.get

@@ -10,16 +10,11 @@ defmodule PlayerWS do
         {binary, <<0:8000>>}
     ], State}.
 
-  map update syntax
-  %{oldmap | field: field_data}
-
   Looking up, dispatching and registering are efficient and immediate at the
   cost of delayed unsubscription. For example, if a process crashes, its keys
   are automatically removed from the registry but the change may not propagate immediately.
 
   https://hexdocs.pm/elixir/Registry.html#unregister/2
-
-  TODO add @type for ws state and update @spec's
   """
   @behaviour :cowboy_websocket
   @r PlayersRegistry
@@ -28,6 +23,13 @@ defmodule PlayerWS do
 
   @enforce_keys [:room_id, :name]
   defstruct [:room_id, :name, :is_admin, :is_spectator]
+
+  @type t :: %PlayerWS{
+          room_id: String.t(),
+          name: String.t(),
+          is_admin: boolean(),
+          is_spectator: boolean()
+        }
 
   @impl true
   def init(request, _state) do

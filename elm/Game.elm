@@ -1,10 +1,18 @@
 port module Game exposing (..)
 
 import Browser
+import Dict exposing (Dict)
 import Html exposing (Html, a, div, img)
 import Html.Attributes exposing (attribute, class, src)
 import Json.Decode as Decode exposing (Decoder, andThen, decodeString, fail, field, string)
 import Json.Encode as Encode
+
+
+type GameState
+    = Prepare
+    | Transition
+    | PlayerTurn
+    | GameEnd
 
 
 type Msg
@@ -26,10 +34,29 @@ type ServerEvent
     | PlayerJoin String
 
 
+type PlayerStatus
+    = Admin
+    | Normal
+    | Alive
+    | Dead
+    | Disconnected
+    | Spectator
+
+
+type alias Player =
+    { fp : String
+    , icon : String
+    , lives : Int
+    , buffer : String
+    , status : PlayerStatus
+    }
+
+
 type alias Model =
     { fp : String
     , game_id : String
     , buffer : String
+    , players : Dict Int Player
     }
 
 
@@ -57,7 +84,7 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init () =
-    ( Model "loading..." "-> TODO ->" "", Cmd.none )
+    ( Model "loading..." "-> TODO ->" "" Dict.empty, Cmd.none )
 
 
 view : Model -> Html Msg

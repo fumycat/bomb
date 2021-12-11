@@ -8,6 +8,16 @@ defmodule RoomManager do
   @enforce_keys [:room_id, :admin_pid, :settings]
   defstruct [:room_id, :admin_pid, :settings, :turn, used_words: [], actual_players: []]
 
+  @type t :: %RoomManager{
+          room_id: String.t(),
+          admin_pid: pid(),
+          settings: map(),
+          # TODO?
+          turn: any(),
+          used_words: [String.t()],
+          actual_players: [pid()]
+        }
+
   # Api
 
   @spec tweak(String.t(), :lives | :players_max, integer()) :: any()
@@ -82,7 +92,11 @@ defmodule RoomManager do
   def handle_info({:DOWN, _ref, :process, object, _reason}, state) do
     # TODO notify about player leaving
     new_state = %{state | actual_players: state.actual_players -- [object]}
-    Logger.debug("Process #{inspect(object)} down in room #{state.room_id} players left: #{length(new_state.actual_players)}")
+
+    Logger.debug(
+      "Process #{inspect(object)} down in room #{state.room_id} players left: #{length(new_state.actual_players)}"
+    )
+
     {:noreply, new_state}
   end
 
@@ -116,5 +130,4 @@ defmodule RoomManager do
       end
     end)
   end
-
 end

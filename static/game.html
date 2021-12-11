@@ -7,6 +7,11 @@
   <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
   <title>Bomb!</title>
   <style>
+    #core {
+      display: flex;
+      justify-content: center;
+    }
+    
     .container {
       --d: 6.5em;
       /* image size */
@@ -40,7 +45,9 @@
 </head>
 
 <body>
-  <div id="main"></div>
+  <div id="core">
+    <div id="main"></div>
+  </div>
   <script src="game.js"></script>
   <script>
     var socket = new WebSocket('ws://' + document.location.host + '/ws' + document.location.pathname);
