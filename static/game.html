@@ -11,7 +11,7 @@
       display: flex;
       justify-content: center;
     }
-    
+
     .container {
       --d: 6.5em;
       /* image size */
@@ -27,7 +27,7 @@
       background: whitesmoke;
     }
 
-    .container a {
+    .container div.player {
       position: absolute;
       top: 50%;
       left: 50%;
@@ -38,7 +38,20 @@
       transform: rotate(var(--az)) translate(var(--r)) rotate(calc(-1*var(--az)));
     }
 
+    .player-name {
+      white-space: nowrap;
+      display: flex;
+      justify-content: center;
+    }
+
+    .player-text {
+      white-space: nowrap;
+      display: flex;
+      justify-content: center;
+    }
+
     img {
+      display: inline;
       max-width: 100%;
     }
   </style>
