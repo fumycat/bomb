@@ -1,10 +1,17 @@
-use Mix.Config
+import Config
+
+config :phoenix, :json_library, Jason
+
+config :explosive, Web.Endpoint,
+  url: [host: "localhost"],
+  http: [port: 4000],
+  server: true
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:pid]
 
-config :bomb,
+config :explosive,
   games_max: 1000,
 
   players_min: 3,

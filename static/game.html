@@ -63,7 +63,8 @@
   </div>
   <script src="game.js"></script>
   <script>
-    var socket = new WebSocket('ws://' + document.location.host + '/ws' + document.location.pathname);
+    // temporary disable ws
+    // var socket = new WebSocket('ws://' + document.location.host + '/ws' + document.location.pathname);
 
     var app = Elm.Game.init({
       node: document.getElementById('main')
