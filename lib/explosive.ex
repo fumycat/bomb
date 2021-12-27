@@ -1,4 +1,4 @@
-defmodule BombCoreApp do
+defmodule Explosive do
   @moduledoc false
 
   require Logger
