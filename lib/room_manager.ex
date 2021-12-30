@@ -48,8 +48,8 @@ defmodule RoomManager do
       room_id: room_id,
       admin_pid: pid,
       settings: %{
-        lives: Application.fetch_env!(:bomb, :lives_def),
-        players_max: Application.fetch_env!(:bomb, :players_max)
+        lives: Application.fetch_env!(:explosive, :lives_def),
+        players_max: Application.fetch_env!(:explosive, :players_max)
       }
     }
 

@@ -33,12 +33,12 @@ defmodule Explosive do
         restart: :transient,
         name: ManagerSupervisor,
         strategy: :one_for_one,
-        max_children: Application.fetch_env!(:bomb, :games_max)
+        max_children: Application.fetch_env!(:explosive, :games_max)
       ),
       Dictionary.child_spec()
     ]
 
-    opts = [strategy: :one_for_one, name: Bomb.Supervisor]
+    opts = [strategy: :one_for_one, name: Explosive.Supervisor]
     Logger.info("Running bomb app...")
     Supervisor.start_link(children, opts)
   end

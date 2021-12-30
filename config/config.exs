@@ -1,10 +1,10 @@
-use Mix.Config
+import Config
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:pid]
 
-config :bomb,
+config :explosive,
   games_max: 1000,
 
   players_min: 3,
