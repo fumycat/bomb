@@ -32,7 +32,7 @@ defmodule Router do
         Plug.Conn.send_file(conn, 200, p)
 
       false ->
-        case String.match?(p, ~r/^[A-z]{5,5}$/) do
+        case String.match?(p, ~r/^[A-z]{5}$/) do
           true ->
             Plug.Conn.send_file(conn, 200, "static/game.html")
 
